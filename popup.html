@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humanify</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span class="logo-icon">H</span>
+      <span class="logo-text">Humanify</span>
+    </div>
+    <div class="usage-badge" id="usageBadge">0/5 today</div>
+  </div>
+
+  <!-- Selected Text Preview -->
+  <div class="section" id="textSection">
+    <div class="section-header">
+      <span class="section-title">Selected Text</span>
+      <span class="ai-score" id="aiScore">—</span>
+    </div>
+    <div class="text-preview" id="textPreview">
+      <span class="placeholder">Select text on page, then click "Analyze"</span>
+    </div>
+  </div>
+
+  <!-- Analyze Button -->
+  <button class="btn btn-analyze" id="analyzeBtn" disabled>
+    <span class="btn-text">Analyze AI Score</span>
+    <span class="btn-loader" id="analyzeLoader"></span>
+  </button>
+
+  <!-- Rewrite Section -->
+  <div class="section hidden" id="rewriteSection">
+    <div class="section-header">
+      <span class="section-title">Tone</span>
+    </div>
+    <div class="tone-selector">
+      <button class="tone-btn active" data-tone="casual">Casual</button>
+      <button class="tone-btn" data-tone="neutral">Neutral</button>
+      <button class="tone-btn" data-tone="formal">Formal</button>
+    </div>
+
+    <button class="btn btn-rewrite" id="rewriteBtn">
+      <span class="btn-text">Humanify Text</span>
+      <span class="btn-loader" id="rewriteLoader"></span>
+    </button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="section hidden" id="resultSection">
+    <div class="section-header">
+      <span class="section-title">Humanized Result</span>
+      <span class="result-tone" id="resultTone"></span>
+    </div>
+    <div class="result-box" id="resultBox"></div>
+    <div class="result-actions">
+      <button class="btn btn-copy" id="copyBtn">Copy</button>
+      <button class="btn btn-rewrite-sm" id="rerewriteBtn">Rewrite Again</button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-msg hidden" id="errorMsg"></div>
+
+  <!-- Settings Toggle -->
+  <div class="settings-toggle" id="settingsToggle">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+    <span>Settings</span>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel hidden" id="settingsPanel">
+    <div class="setting-group">
+      <label class="setting-label">Groq API Key</label>
+      <input type="password" class="setting-input" id="apiKeyInput" placeholder="Enter your Groq API key...">
+      <div class="setting-hint">Get a free key at <a href="https://console.groq.com/keys" target="_blank">console.groq.com</a></div>
+      <button class="btn btn-save" id="saveKeyBtn">Save Key</button>
+    </div>
+    <div class="setting-group">
+      <button class="btn btn-reset" id="resetUsageBtn">Reset Daily Usage</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
