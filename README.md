@@ -5,9 +5,9 @@ One-click rewrite AI-generated content into natural, human-sounding text.
 ## Features
 
 - **AI Detection** — Analyzes selected text for AI-telltale patterns (overused words, sentence structures, stylistic markers)
-- **One-Click Rewriting** — Powered by [Groq API](https://groq.com/) (free, fast inference)
+- **One-Click Rewriting** — Powered by [DeepSeek API](https://platform.deepseek.com) (free, fast inference, China-accessible)
 - **Tone Adjustment** — Choose between Casual, Neutral, or Formal voice
-- **Privacy-First** — All text processing happens locally or through Groq API; no data stored on third-party servers
+- **Privacy-First** — All text processing happens locally or through DeepSeek API; no data stored on third-party servers
 - **Daily Free Tier** — 5 rewrites per day, no credit card required
 
 ## How It Works
@@ -24,7 +24,7 @@ One-click rewrite AI-generated content into natural, human-sounding text.
 ### Prerequisites
 
 - [Google Chrome](https://www.google.com/chrome/) (or Chromium-based browser)
-- A free [Groq API key](https://console.groq.com/keys)
+- A free [DeepSeek API key](https://platform.deepseek.com/api_keys)
 
 ### Installation
 
@@ -32,14 +32,14 @@ One-click rewrite AI-generated content into natural, human-sounding text.
 2. Enable **Developer Mode** (toggle in top-right corner)
 3. Click **Load unpacked**
 4. Select the `Humanify` folder from this repo
-5. Click the Humanify icon in the toolbar → **Settings** → paste your Groq API key
+5. Click the Humanify icon in the toolbar → **Settings** → paste your DeepSeek API key
 
-### Getting a Groq API Key
+### Getting a DeepSeek API Key
 
-1. Visit [console.groq.com](https://console.groq.com/)
+1. Visit [platform.deepseek.com](https://platform.deepseek.com/)
 2. Sign up / log in (free)
 3. Go to **API Keys** → Create a new key
-4. Copy the key (starts with `gsk_`)
+4. Copy the key (starts with `sk-`)
 5. Paste it in Humanify Settings
 
 ## Technical Stack
@@ -48,7 +48,7 @@ One-click rewrite AI-generated content into natural, human-sounding text.
 |-------|-----------|-------------|
 | Extension | Manifest V3 | Chrome extension latest standard |
 | Backend Logic | Service Worker | Background processing, API calls |
-| AI Rewriting | Groq API (Llama 3.3 70B) | Free, fast LLM inference |
+| AI Rewriting | DeepSeek API (DeepSeek Chat) | Free, fast LLM inference |
 | AI Detection | Regex Heuristics | Pattern matching for AI-telltale text |
 | UI | Vanilla HTML/CSS/JS | Zero dependencies, lightweight |
 
@@ -98,13 +98,13 @@ Humanify uses a multi-signal heuristic approach to estimate AI likelihood:
 
 - **Low cost** — $9.99/mo vs competitors at $15-30/mo
 - **Simple UX** — Select → Analyze → Humanize → Copy (4 clicks)
-- **Fast** — Groq API delivers sub-2-second rewrites
+- **Fast** — DeepSeek API delivers fast rewrites
 - **Privacy** — No account required, no data collection
 
 ## Roadmap
 
 - [x] AI detection scoring
-- [x] One-click rewriting via Groq API
+- [x] One-click rewriting via DeepSeek API
 - [x] Tone adjustment (Casual / Neutral / Formal)
 - [x] Daily usage limits (free tier)
 - [ ] Pro subscription with Stripe integration

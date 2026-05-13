@@ -229,8 +229,8 @@ async function handleSaveKey() {
     showError('Please enter a valid API key.');
     return;
   }
-  if (!key.startsWith('gsk_')) {
-    showError('Invalid Groq API key. Keys should start with "gsk_".');
+  if (!key.startsWith('sk-')) {
+    showError('Invalid DeepSeek API key. Keys should start with "sk-".');
     return;
   }
 

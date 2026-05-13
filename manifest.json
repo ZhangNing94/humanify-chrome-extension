@@ -12,10 +12,11 @@
   "permissions": [
     "activeTab",
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "scripting"
   ],
   "host_permissions": [
-    "https://api.groq.com/*"
+    "https://api.deepseek.com/*"
   ],
   "action": {
     "default_popup": "popup.html",

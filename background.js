@@ -1,9 +1,9 @@
 // Humanify - Background Service Worker
-// Handles Groq API calls, AI detection, usage tracking
+// Handles DeepSeek API calls, AI detection, usage tracking
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const FREE_DAILY_LIMIT = 5;
-const MODEL = 'llama-3.3-70b-versatile';
+const MODEL = 'deepseek-chat';
 
 // --- AI Detection Patterns ---
 // Words and phrases highly characteristic of AI-generated text
@@ -157,8 +157,8 @@ function detectAI(text) {
   return { score, results, wordCount };
 }
 
-// --- Groq API Client ---
-async function rewriteWithGroq(text, tone, apiKey) {
+// --- DeepSeek API Client ---
+async function rewriteWithDeepSeek(text, tone, apiKey) {
   const toneInstructions = {
     casual: 'Use conversational language, contractions (e.g., "it\'s", "don\'t"), short sentences, and a friendly tone. Write like you\'re talking to a friend. Use informal expressions, rhetorical questions, and occasional humor where appropriate. Vary sentence length for natural rhythm.',
     formal: 'Use professional language appropriate for business or academic contexts. Avoid contractions and slang. Maintain a polished, respectful tone. Use varied but controlled sentence structures.',
@@ -180,7 +180,7 @@ CRITICAL RULES:
 
 FORMAT: Return ONLY the rewritten text. No explanations, no markdown, no quotes around the response.`;
 
-  const response = await fetch(GROQ_API_URL, {
+  const response = await fetch(DEEPSEEK_API_URL, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -201,12 +201,15 @@ FORMAT: Return ONLY the rewritten text. No explanations, no markdown, no quotes 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      throw new Error('Invalid API key. Please check your Groq API key in settings.');
+      throw new Error('Invalid API key. Please check your DeepSeek API key in settings.');
     }
     if (response.status === 429) {
-      throw new Error('Groq API rate limit exceeded. Please wait a moment and try again.');
+      throw new Error('DeepSeek API rate limit exceeded. Please wait a moment and try again.');
     }
-    throw new Error(`Groq API error: ${error.error?.message || response.statusText}`);
+    if (response.status === 402) {
+      throw new Error('DeepSeek account balance insufficient. Please top up at platform.deepseek.com.');
+    }
+    throw new Error(`DeepSeek API error: ${error.error?.message || response.statusText}`);
   }
 
   const data = await response.json();
@@ -231,7 +234,7 @@ async function handleMessage(request, sender, sendResponse) {
       case 'rewrite': {
         const apiKey = request.apiKey;
         if (!apiKey) {
-          sendResponse({ success: false, error: 'Please set your Groq API key in settings.' });
+          sendResponse({ success: false, error: 'Please set your DeepSeek API key in settings.' });
           return;
         }
 
@@ -246,7 +249,7 @@ async function handleMessage(request, sender, sendResponse) {
           return;
         }
 
-        const rewritten = await rewriteWithGroq(request.text, request.tone || 'neutral', apiKey);
+        const rewritten = await rewriteWithDeepSeek(request.text, request.tone || 'neutral', apiKey);
         const newCount = await incrementUsage();
         const newUsage = { used: newCount, limit: FREE_DAILY_LIMIT, canUse: newCount < FREE_DAILY_LIMIT };
 
@@ -261,13 +264,13 @@ async function handleMessage(request, sender, sendResponse) {
       }
 
       case 'getApiKey': {
-        const data = await chrome.storage.local.get('groqApiKey');
-        sendResponse({ success: true, data: data.groqApiKey || null });
+        const data = await chrome.storage.local.get('deepseekApiKey');
+        sendResponse({ success: true, data: data.deepseekApiKey || null });
         break;
       }
 
       case 'setApiKey': {
-        await chrome.storage.local.set({ groqApiKey: request.apiKey });
+        await chrome.storage.local.set({ deepseekApiKey: request.apiKey });
         sendResponse({ success: true });
         break;
       }
