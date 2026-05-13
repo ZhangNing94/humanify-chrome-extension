@@ -66,30 +66,28 @@ async function loadUsage() {
 async function getSelectedText() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab) return;
+    if (!tab) {
+      analyzeBtn.disabled = false;
+      return;
+    }
 
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: () => window.getSelection().toString().trim()
-    });
-
-    if (results?.[0]?.result) {
-      selectedText = results[0].result;
-      textPreview.textContent = selectedText;
-      textPreview.classList.remove('placeholder-style');
+    // Use content script messaging (works cross-browser including QQ)
+    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getSelectedText' });
+    if (response?.text) {
+      selectedText = response.text;
+      textPreview.value = selectedText;
       analyzeBtn.disabled = false;
       analyzeBtn.style.opacity = '1';
-    } else {
-      textPreview.textContent = '';
-      textPreview.innerHTML = '<span class="placeholder">Select text on page, then click "Analyze"</span>';
-      analyzeBtn.disabled = true;
-      analyzeBtn.style.opacity = '0.5';
+      return;
     }
   } catch (e) {
-    textPreview.innerHTML = '<span class="placeholder">Select text on page, then click "Analyze"</span>';
-    analyzeBtn.disabled = true;
-    analyzeBtn.style.opacity = '0.5';
+    // Content script may not be ready — allow manual input
   }
+
+  // Allow manual typing/pasting even without page selection
+  textPreview.value = '';
+  analyzeBtn.disabled = false;
+  analyzeBtn.style.opacity = '1';
 }
 
 // --- Event Listeners ---
@@ -120,6 +118,7 @@ function toggleSettings() {
 
 // --- Analyze ---
 async function handleAnalyze() {
+  selectedText = textPreview.value.trim();
   if (!selectedText) return;
 
   setLoading(analyzeBtn, analyzeLoader, true);
@@ -165,6 +164,7 @@ function showScore(score) {
 
 // --- Rewrite ---
 async function handleRewrite() {
+  selectedText = textPreview.value.trim();
   if (!selectedText) return;
 
   setLoading(rewriteBtn, rewriteLoader, true);
