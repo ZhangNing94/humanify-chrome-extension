@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - Humanify</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+  @media (prefers-color-scheme: dark) { body { background: #1a1a2e; color: #e0e0e0; } a { color: #7ec8e3; } }
+  h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.3rem; margin-top: 2rem; color: #555; }
+  @media (prefers-color-scheme: dark) { h2 { color: #aaa; } }
+  .last-updated { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
+  ul { padding-left: 1.5rem; }
+  li { margin-bottom: 0.4rem; }
+</style>
+</head>
+<body>
+<h1>Privacy Policy</h1>
+<p class="last-updated"><strong>Last updated:</strong> May 13, 2026</p>
+
+<p>Humanify ("the Extension") is committed to protecting your privacy. This policy explains what data we handle and how.</p>
+
+<h2>1. Data We Collect</h2>
+<p><strong>We do NOT collect personal data.</strong> The Extension does not track browsing history, collect analytics, or store any personally identifiable information on remote servers.</p>
+<ul>
+  <li><strong>Text you submit for rewriting:</strong> Sent only to the AI provider (DeepSeek API) for processing. Not stored on our servers.</li>
+  <li><strong>API Key (optional):</strong> If you provide your own DeepSeek API key, it is stored locally in Chrome's <code>chrome.storage.local</code> and never leaves your device except when sent directly to DeepSeek for authentication.</li>
+  <li><strong>Usage counter:</strong> A daily usage count is stored locally to enforce the free tier limit (3 rewrites/day). This data never leaves your device.</li>
+</ul>
+
+<h2>2. How We Use Data</h2>
+<p>The text you select and submit for rewriting is transmitted to <strong>DeepSeek API</strong> (<code>api.deepseek.com</code>) solely for the purpose of generating a rewritten version. DeepSeek's privacy policy governs their handling of that data.</p>
+<p>No data is stored on any server we control. All processing is transient.</p>
+
+<h2>3. Third-Party Services</h2>
+<p>The Extension uses one third-party service:</p>
+<ul>
+  <li><strong>DeepSeek API</strong> — AI text rewriting. See <a href="https://platform.deepseek.com/privacy">DeepSeek Privacy Policy</a>.</li>
+</ul>
+<p>No analytics, advertising, or tracking SDKs are included.</p>
+
+<h2>4. Data Storage</h2>
+<p>All local data (API key, usage count) is stored in Chrome's <code>chrome.storage.local</code>. You can clear this at any time via Chrome Settings -> Privacy -> Clear browsing data, or by uninstalling the Extension.</p>
+
+<h2>5. Your Rights</h2>
+<ul>
+  <li><strong>Access:</strong> You can inspect all stored data via Chrome DevTools (Application -> Storage -> chrome.storage.local).</li>
+  <li><strong>Delete:</strong> Uninstalling the Extension removes all local data immediately.</li>
+  <li><strong>Opt out:</strong> Simply stop using the Extension. No data persists beyond what is on your device.</li>
+</ul>
+
+<h2>6. Permissions Explained</h2>
+<ul>
+  <li><strong>activeTab:</strong> Needed to read the selected text on the current page for rewriting.</li>
+  <li><strong>contextMenus:</strong> Needed to add "Rewrite with Humanify" to the right-click menu.</li>
+  <li><strong>storage:</strong> Needed to save your API key and daily usage count locally.</li>
+  <li><strong>scripting:</strong> Needed to inject the rewriting interface into the page.</li>
+  <li><strong>commands:</strong> Needed for the Ctrl+Shift+R keyboard shortcut.</li>
+</ul>
+
+<h2>7. Children's Privacy</h2>
+<p>The Extension is not directed at children under 13 and does not knowingly collect data from them.</p>
+
+<h2>8. Changes to This Policy</h2>
+<p>Updates will be reflected on this page. The "Last updated" date will change accordingly.</p>
+
+<h2>9. Contact</h2>
+<p>For questions about this privacy policy, open an issue at <a href="https://github.com/ZhangNing94/humanify-chrome-extension/issues/">GitHub Issues</a>.</p>
+</body>
+</html>
