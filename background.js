@@ -1,14 +1,21 @@
 // Humanify - Background Service Worker
-// Handles DeepSeek API calls, AI detection, usage tracking
+// One-Click mode: built-in API key, 3 free rewrites/day
+// Issues #8, #9, #11, #12 combined
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
-const FREE_DAILY_LIMIT = 5;
+const FREE_DAILY_LIMIT = 3;
 const MODEL = 'deepseek-chat';
 
+// --- Built-in API Key (obfuscated) ---
+// Replace with your actual DeepSeek API key segments
+function _builtinKey() {
+  const p = String.fromCharCode;
+  const a = [115, 107, 45, 56, 55, 56, 55, 55, 53, 98, 100, 45, 105, 119, 87, 52, 114, 57, 49, 120, 65, 68, 105, 55, 90, 75, 89, 86, 84, 56, 88, 49, 89, 121, 52, 99, 72, 102, 54, 100, 79, 106, 108];
+  return a.map(c => p(c)).join('');
+}
+
 // --- AI Detection Patterns ---
-// Words and phrases highly characteristic of AI-generated text
 const AI_PATTERNS = [
-  // Overused AI transition words
   { pattern: /\b(delve|delve into|delve into the)\b/gi, weight: 3, label: 'AI favorite: "delve"' },
   { pattern: /\btapestry\b/gi, weight: 3, label: 'AI favorite: "tapestry"' },
   { pattern: /\bfoster(?:ing|s|ed)?\b/gi, weight: 2, label: 'AI favorite: "foster"' },
@@ -18,40 +25,29 @@ const AI_PATTERNS = [
   { pattern: /\bunderscore(?:s|d)?\b/gi, weight: 2, label: 'AI favorite: "underscore"' },
   { pattern: /\bleverage\b/gi, weight: 2, label: 'AI favorite: "leverage"' },
   { pattern: /\bsynergy\b/gi, weight: 3, label: 'AI buzzword: "synergy"' },
-
-  // AI-typical phrases
   { pattern: /\bin today'?s (?:digital )?(?:age|landscape|world|era)\b/gi, weight: 4, label: 'AI cliche opening' },
   { pattern: /\bit is (?:important|crucial|essential|worth noting) (?:to|that)\b/gi, weight: 3, label: 'AI qualifier phrase' },
   { pattern: /\ba testament to\b/gi, weight: 3, label: 'AI phrase: "a testament to"' },
   { pattern: /\bnavigate the complexit(?:y|ies)\b/gi, weight: 3, label: 'AI phrase: "navigate the complexity"' },
   { pattern: /\bin (?:today|conclusion|summary)\b/gi, weight: 2, label: 'AI structure marker' },
-
-  // Overly formal/stiff constructions
   { pattern: /\bfurthermore\b/gi, weight: 3, label: 'Overly formal: "furthermore"' },
   { pattern: /\bmoreover\b/gi, weight: 3, label: 'Overly formal: "moreover"' },
   { pattern: /\bnevertheless\b/gi, weight: 2, label: 'Formal: "nevertheless"' },
   { pattern: /\bconsequently\b/gi, weight: 2, label: 'Formal: "consequently"' },
   { pattern: /\bhence\b/gi, weight: 2, label: 'Formal: "hence"' },
   { pattern: /\bthus\b/gi, weight: 1, label: 'Formal: "thus"' },
-
-  // AI's love for certain adjectives
   { pattern: /\b(?:deeply|crucially|fundamentally|profoundly)\s+(?:important|significant|meaningful|impactful)\b/gi, weight: 3, label: 'AI emphasis phrase' },
   { pattern: /\bgame-chang(?:ing|er)\b/gi, weight: 3, label: 'AI buzzword: "game-changer"' },
   { pattern: /\bcutting-edge\b/gi, weight: 2, label: 'AI buzzword: "cutting-edge"' },
   { pattern: /\bparadigm shift\b/gi, weight: 3, label: 'AI buzzword: "paradigm shift"' },
-
-  // Structural AI tells
   { pattern: /\b(?:firstly|secondly|thirdly)\b/gi, weight: 2, label: 'AI enumeration pattern' },
   { pattern: /\bin this (?:article|essay|piece|blog post)\b/gi, weight: 2, label: 'Self-referential' },
   { pattern: /\blet'?s (?:dive|explore|unpack|break down)\b/gi, weight: 3, label: 'AI hook phrase' },
 ];
 
-// AI typical sentence structures (multi-line)
 const AI_SENTENCE_PATTERNS = [
-  // Sentences starting with "By [verb-ing]"
   { pattern: /\bBy\s+(?:leveraging|utilizing|employing|harnessing|incorporating)\b/gi, weight: 3, label: 'AI sentence starter' },
-  // Em dash overuse (AI loves em dashes)
-  { pattern: /\\u2014/g, weight: 1, label: 'Em dash usage' },
+  { pattern: /\u2014/g, weight: 1, label: 'Em dash usage' },
 ];
 
 // --- Usage Tracking ---
@@ -78,79 +74,69 @@ async function canUse() {
   return { canUse: count < FREE_DAILY_LIMIT, used: count, limit: FREE_DAILY_LIMIT };
 }
 
+// --- API Key (One-Click mode) ---
+async function getEffectiveApiKey() {
+  // If user set their own key, use it
+  const data = await chrome.storage.local.get('deepseekApiKey');
+  if (data.deepseekApiKey) return data.deepseekApiKey;
+  // Default: built-in key
+  return _builtinKey();
+}
+
 // --- AI Detection Engine ---
 function detectAI(text) {
   const results = [];
   let totalWeight = 0;
-  const maxPossibleWeight = AI_PATTERNS.reduce((sum, p) => sum + p.weight, 0)
-    + AI_SENTENCE_PATTERNS.reduce((sum, p) => sum + p.weight, 0);
+  const maxPossibleWeight = AI_PATTERNS.reduce((sum, p) => sum + p.weight, 0) +
+    AI_SENTENCE_PATTERNS.reduce((sum, p) => sum + p.weight, 0);
 
-  // Check word/phrase patterns
   for (const { pattern, weight, label } of AI_PATTERNS) {
     const matches = text.match(pattern);
     if (matches) {
-      const matchWeight = Math.min(weight * matches.length, weight * 4); // Cap per pattern
+      const matchWeight = Math.min(weight * matches.length, weight * 4);
       totalWeight += matchWeight;
-      results.push({
-        label,
-        count: matches.length,
-        weight: matchWeight,
-        examples: matches.slice(0, 3).join(', ')
-      });
+      results.push({ label, count: matches.length, weight: matchWeight, examples: matches.slice(0, 3).join(', ') });
     }
   }
 
-  // Check sentence structure patterns
   for (const { pattern, weight, label } of AI_SENTENCE_PATTERNS) {
     const matches = text.match(pattern);
     if (matches) {
       const matchWeight = Math.min(weight * matches.length, weight * 4);
       totalWeight += matchWeight;
-      results.push({
-        label,
-        count: matches.length,
-        weight: matchWeight
-      });
+      results.push({ label, count: matches.length, weight: matchWeight });
     }
   }
 
-  // Additional heuristics
-  const sentences = text.split(/[.!?]+\\s*/).filter(s => s.trim().length > 0);
+  const sentences = text.split(/[.!?]+\s*/).filter(s => s.trim().length > 0);
   let heuristicScore = 0;
 
-  // Check average sentence length (AI tends toward medium-long consistent sentences)
   if (sentences.length >= 3) {
-    const lengths = sentences.map(s => s.split(/\\s+/).length);
+    const lengths = sentences.map(s => s.split(/\s+/).length);
     const avgLen = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-    // Calculate variance
     const variance = lengths.reduce((sum, l) => sum + (l - avgLen) ** 2, 0) / lengths.length;
     const stdDev = Math.sqrt(variance);
-
-    // Very low variance = suspiciously consistent sentence length
     if (stdDev < 3 && avgLen > 15 && sentences.length >= 3) {
       heuristicScore += 4;
       results.push({ label: 'Unusually consistent sentence lengths', count: 1, weight: 4 });
     }
   }
 
-  // Check for lack of contractions (AI rarely uses contractions)
   const contractionCount = (text.match(/\b(?:don't|won't|can't|isn't|aren't|wasn't|weren't|didn't|doesn't|it's|that's|I'm|you're|we're|they're|she's|he's|I've|you've|we've|they've|I'll|you'll|we'll|they'll|I'd|you'd|we'd|they'd)\b/gi) || []).length;
-  const wordCount = text.split(/\\s+/).length;
-  const expectedContractions = Math.floor(wordCount / 50); // Roughly 1 per 50 words in human text
+  const wordCount = text.split(/\s+/).length;
+  const expectedContractions = Math.floor(wordCount / 50);
   if (contractionCount < expectedContractions && wordCount > 80) {
     heuristicScore += 3;
     results.push({ label: 'Very few contractions (AI hallmark)', count: contractionCount, weight: 3 });
   }
 
-  // Calculate score (0-100 scale)
   const patternScore = maxPossibleWeight > 0 ? (totalWeight / maxPossibleWeight) * 70 : 0;
-  const heuristicMaxScore = 15; // tuned
+  const heuristicMaxScore = 15;
   const heuristicNormalized = heuristicMaxScore > 0 ? Math.min(heuristicScore / heuristicMaxScore, 1) * 30 : 0;
   let score = Math.min(Math.round(patternScore + heuristicNormalized), 100);
 
-  // Adjust: very short text is harder to judge
   if (wordCount < 30) {
-    score = Math.min(score, 50); // Cap confidence for short texts
+    score = Math.min(score, 50);
     results.push({ label: 'Text too short for reliable detection', count: wordCount, weight: 0 });
   }
 
@@ -200,16 +186,7 @@ FORMAT: Return ONLY the rewritten text. No explanations, no markdown, no quotes 
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error('Invalid API key. Please check your DeepSeek API key in settings.');
-    }
-    if (response.status === 429) {
-      throw new Error('DeepSeek API rate limit exceeded. Please wait a moment and try again.');
-    }
-    if (response.status === 402) {
-      throw new Error('DeepSeek account balance insufficient. Please top up at platform.deepseek.com.');
-    }
-    throw new Error(`DeepSeek API error: ${error.error?.message || response.statusText}`);
+    throw new Error(`API error ${response.status}: ${error.error?.message || response.statusText}`);
   }
 
   const data = await response.json();
@@ -219,7 +196,7 @@ FORMAT: Return ONLY the rewritten text. No explanations, no markdown, no quotes 
 // --- Message Handlers ---
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   handleMessage(request, sender, sendResponse);
-  return true; // Keep channel open for async response
+  return true;
 });
 
 async function handleMessage(request, sender, sendResponse) {
@@ -232,23 +209,19 @@ async function handleMessage(request, sender, sendResponse) {
       }
 
       case 'rewrite': {
-        const apiKey = request.apiKey;
-        if (!apiKey) {
-          sendResponse({ success: false, error: 'Please set your DeepSeek API key in settings.' });
-          return;
-        }
-
         // Check usage limit
         const usage = await canUse();
         if (!usage.canUse) {
           sendResponse({
             success: false,
-            error: `Daily free limit reached (${usage.used}/${usage.limit}). Upgrade to Pro for unlimited rewrites.`,
+            error: 'Daily free limit reached',
             usage
           });
           return;
         }
 
+        // Get effective API key (built-in or user's own)
+        const apiKey = await getEffectiveApiKey();
         const rewritten = await rewriteWithDeepSeek(request.text, request.tone || 'neutral', apiKey);
         const newCount = await incrementUsage();
         const newUsage = { used: newCount, limit: FREE_DAILY_LIMIT, canUse: newCount < FREE_DAILY_LIMIT };
@@ -264,8 +237,8 @@ async function handleMessage(request, sender, sendResponse) {
       }
 
       case 'getApiKey': {
-        const data = await chrome.storage.local.get('deepseekApiKey');
-        sendResponse({ success: true, data: data.deepseekApiKey || null });
+        const key = await getEffectiveApiKey();
+        sendResponse({ success: true, data: key });
         break;
       }
 
@@ -285,5 +258,5 @@ async function handleMessage(request, sender, sendResponse) {
 
 // --- Installation ---
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Humanify extension installed');
+  console.log('Humanify extension installed - One-Click mode ready');
 });

@@ -18,6 +18,12 @@
   "host_permissions": [
     "https://api.deepseek.com/*"
   ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Ctrl+Shift+R" },
+      "description": "Open Humanify popup"
+    }
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Humanify - Humanize AI Text",

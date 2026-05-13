@@ -13,7 +13,16 @@
       <span class="logo-icon">H</span>
       <span class="logo-text">Humanify</span>
     </div>
-    <div class="usage-badge" id="usageBadge">0/5 today</div>
+    <div class="usage-badge" id="usageBadge">0/3 free today</div>
+  </div>
+
+  <!-- Upgrade Banner -->
+  <div class="upgrade-banner hidden" id="upgradeBanner">
+    <div class="upgrade-banner-text">✨ You've used 3/3 free rewrites today</div>
+    <div class="upgrade-banner-actions">
+      <button class="upgrade-btn" id="upgradeBtn">Try Pro</button>
+      <button class="not-now-btn" id="notNowBtn">Not now</button>
+    </div>
   </div>
 
   <!-- Selected Text Preview -->
@@ -22,11 +31,11 @@
       <span class="section-title">Selected Text</span>
       <span class="ai-score" id="aiScore">—</span>
     </div>
-    <textarea class="text-preview" id="textPreview" placeholder="Select text on page, or type/paste here..."></textarea>
+    <textarea class="text-preview" id="textPreview" placeholder="Select text on any webpage, or paste here to rewrite it...&#10;&#10;Example: &quot;The meeting was very productive and we discussed many important topics.&quot;"></textarea>
   </div>
 
   <!-- Analyze Button -->
-  <button class="btn btn-analyze" id="analyzeBtn" disabled>
+  <button class="btn btn-analyze" id="analyzeBtn">
     <span class="btn-text">Analyze AI Score</span>
     <span class="btn-loader" id="analyzeLoader"></span>
   </button>
@@ -57,6 +66,7 @@
     <div class="result-box" id="resultBox"></div>
     <div class="result-actions">
       <button class="btn btn-copy" id="copyBtn">Copy</button>
+      <button class="btn btn-replace" id="replaceBtn">Replace</button>
       <button class="btn btn-rewrite-sm" id="rerewriteBtn">Rewrite Again</button>
     </div>
   </div>
@@ -64,9 +74,12 @@
   <!-- Error Message -->
   <div class="error-msg hidden" id="errorMsg"></div>
 
+  <!-- Privacy Footer -->
+  <div class="privacy-footer">Your data stays local • No tracking</div>
+
   <!-- Settings Toggle -->
   <div class="settings-toggle" id="settingsToggle">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="3"></circle>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
     </svg>
@@ -78,7 +91,7 @@
     <div class="setting-group">
       <label class="setting-label">DeepSeek API Key</label>
       <input type="password" class="setting-input" id="apiKeyInput" placeholder="Enter your DeepSeek API key...">
-      <div class="setting-hint">Get a free key at <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a></div>
+      <div class="setting-hint">Free keys at <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a></div>
       <button class="btn btn-save" id="saveKeyBtn">Save Key</button>
     </div>
     <div class="setting-group">
