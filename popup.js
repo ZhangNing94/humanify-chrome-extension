@@ -217,12 +217,19 @@ function showUpgradePrompt() {
 }
 
 // --- Settings ---
+// Encode API key using char-code before storage
+function encodeApiKey(key) {
+  return key.split('').map(c => c.charCodeAt(0)).join(',');
+}
+
 async function handleSaveKey() {
   const key = apiKeyInput.value.trim();
   if (!key) { showError('Please enter a valid API key.'); return; }
   if (!key.startsWith('sk-')) { showError('Invalid key. Keys should start with "sk-".'); return; }
   try {
-    await chrome.runtime.sendMessage({ action: 'setApiKey', apiKey: key });
+    // Encode before storing — char-code obfuscation
+    const encoded = encodeApiKey(key);
+    await chrome.runtime.sendMessage({ action: 'setApiKey', apiKey: encoded });
     errorMsg.classList.add('hidden');
     saveKeyBtn.textContent = 'Saved!';
     saveKeyBtn.style.background = '#10b981';

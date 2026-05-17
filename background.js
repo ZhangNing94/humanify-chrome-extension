@@ -75,10 +75,15 @@ async function canUse() {
 }
 
 // --- API Key (One-Click mode) ---
+function decodeApiKey(encoded) {
+  if (!encoded) return '';
+  return encoded.split(',').map(c => String.fromCharCode(parseInt(c))).join('');
+}
+
 async function getEffectiveApiKey() {
-  // If user set their own key, use it
+  // If user set their own key, decode it (char-code encoded)
   const data = await chrome.storage.local.get('deepseekApiKey');
-  if (data.deepseekApiKey) return data.deepseekApiKey;
+  if (data.deepseekApiKey) return decodeApiKey(data.deepseekApiKey);
   // Default: built-in key
   return _builtinKey();
 }
@@ -237,8 +242,10 @@ async function handleMessage(request, sender, sendResponse) {
       }
 
       case 'getApiKey': {
-        const key = await getEffectiveApiKey();
-        sendResponse({ success: true, data: key });
+        // Return decoded key for display in popup
+        const data = await chrome.storage.local.get('deepseekApiKey');
+        const displayKey = data.deepseekApiKey ? decodeApiKey(data.deepseekApiKey) : '';
+        sendResponse({ success: true, data: displayKey });
         break;
       }
 
