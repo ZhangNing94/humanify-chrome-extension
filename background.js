@@ -2,16 +2,14 @@
 // One-Click mode: built-in API key, 3 free rewrites/day
 // Issues #8, #9, #11, #12 combined
 
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const FREE_DAILY_LIMIT = 3;
 const MODEL = 'deepseek-chat';
 
-// --- Built-in API Key (obfuscated) ---
-// Replace with your actual DeepSeek API key segments
+// --- Built-in API Key (base64 obfuscated) ---
+const BUILT_IN_KEY_B64 = 'c2stODc4Nzc1YmQtaXdXNHI5MXhBRGk3WktZVlQ4WDFZeTRjSGY2ZE9qbA==';
 function _builtinKey() {
-  const p = String.fromCharCode;
-  const a = [115, 107, 45, 56, 55, 56, 55, 55, 53, 98, 100, 45, 105, 119, 87, 52, 114, 57, 49, 120, 65, 68, 105, 55, 90, 75, 89, 86, 84, 56, 88, 49, 89, 121, 52, 99, 72, 102, 54, 100, 79, 106, 108];
-  return a.map(c => p(c)).join('');
+  return atob(BUILT_IN_KEY_B64);
 }
 
 // --- AI Detection Patterns ---
@@ -75,16 +73,12 @@ async function canUse() {
 }
 
 // --- API Key (One-Click mode) ---
-function decodeApiKey(encoded) {
-  if (!encoded) return '';
-  return encoded.split(',').map(c => String.fromCharCode(parseInt(c))).join('');
-}
-
+// User's own key stored as base64 in chrome.storage.local
 async function getEffectiveApiKey() {
-  // If user set their own key, decode it (char-code encoded)
   const data = await chrome.storage.local.get('deepseekApiKey');
-  if (data.deepseekApiKey) return decodeApiKey(data.deepseekApiKey);
-  // Default: built-in key
+  if (data.deepseekApiKey) {
+    try { return atob(data.deepseekApiKey); } catch(e) { return _builtinKey(); }
+  }
   return _builtinKey();
 }
 
@@ -244,13 +238,16 @@ async function handleMessage(request, sender, sendResponse) {
       case 'getApiKey': {
         // Return decoded key for display in popup
         const data = await chrome.storage.local.get('deepseekApiKey');
-        const displayKey = data.deepseekApiKey ? decodeApiKey(data.deepseekApiKey) : '';
+        const displayKey = data.deepseekApiKey ? (() => { try { return atob(data.deepseekApiKey); } catch(e) { return ''; } })() : '';
         sendResponse({ success: true, data: displayKey });
         break;
       }
 
       case 'setApiKey': {
-        await chrome.storage.local.set({ deepseekApiKey: request.apiKey });
+        // Store as base64 (input is raw key string from popup)
+        const rawKey = request.apiKey;
+        const encoded = btoa(rawKey);
+        await chrome.storage.local.set({ deepseekApiKey: encoded });
         sendResponse({ success: true });
         break;
       }
